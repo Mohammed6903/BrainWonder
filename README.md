@@ -1,10 +1,11 @@
 # 🧠 BrainWonders - AI-Powered Career Recommendation System
 
-![Conversation with AI counselor for clarifying interests (when sufficient info is not provided by the conversation text provided)](https://github.com/user-attachments/assets/aaaf171f-ebb1-4cc6-8c1c-d27718ecb877)
+![Conversation with AI counselor for clarifying interests (when sufficient info is not provided by the conversation text provided)](https://github.com/user-attachments/assets/d7d220bb-42a3-486b-825f-478b63e44fe1)
 
-![Final Recommendations after AI decides that enough information is collected about client](https://github.com/user-attachments/assets/8f32cc55-254c-4231-9527-adcc8f327ab0)
+![Final Recommendations after AI decides that enough information is collected about client](https://github.com/user-attachments/assets/2e0c2017-17d6-4285-959d-0145a0273f32)
 
-![Direct recommendation by analysing a predefined conversation that provides sufficient information about likes  or dislikes of client](https://github.com/user-attachments/assets/635e646b-9c53-4fff-bd1a-7968d9db0c86)
+
+![Direct recommendation by analysing a predefined conversation that provides sufficient information about likes  or dislikes of client](https://github.com/user-attachments/assets/2817add0-5e27-44a4-978e-aada2af70461)
 
 > An intelligent career counseling system that analyzes conversations to provide personalized career recommendations across 100+ career paths in 15 different categories.
 

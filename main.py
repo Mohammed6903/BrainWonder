@@ -1,40 +1,63 @@
-from langchain_community.llms import LlamaCpp
-from langchain_core.callbacks import StreamingStdOutCallbackHandler
 from services.recommender import CareerRecommendationSystem
+from llm.llama import create_llama
+from llm.chatgpt import create_chatgpt
+from llm.gemini import create_gemini
+from llm.openRouter import ChatOpenRouter
+from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
+import os
 
-def main():
-    llm = LlamaCpp(
-        model_path="/home/mohammed/.cache/huggingface/hub/models--TheBloke--Mistral-7B-Instruct-v0.2-GGUF/snapshots/3a6fbf4a41a1d52e415a4958cde6856d34b2db93/mistral-7b-instruct-v0.2.Q5_K_M.gguf",
-        temperature=0.3,
-        max_tokens=500,
-        n_ctx=2048,
-        callbacks=[StreamingStdOutCallbackHandler()],
-        n_gpu_layers=16,
-        verbose=False,
-    )
-    
-    career_system = CareerRecommendationSystem(llm)
-    
-    sample_conversation = """
-    User: I’m not really sure what I want to do, but I guess I like working with people.  
-    Counselor: Okay, can you tell me about any hobbies or skills you have?  
-    User: Not much really... I just hang out with friends and watch movies.  
-    Counselor: Any school subjects or activities you enjoy?  
-    User: I don’t know... nothing in particular.  
-    """
-    
-    result = career_system.full_recommendation_pipeline(sample_conversation)
-    
-    if result["status"] == "needs_clarification":
-        # print("Need more information. Questions to ask:")
-        # print(result["questions"])
-        pass
-    else:
-        print("Career Recommendations:")
-        for explanation in result["explanations"]:
-            print(f"\n--- {explanation['career_path']} ---")
-            print(f"Why it matches: {explanation['match_reason']}")
-            print(f"Explanation: {explanation['explanation']}")
+load_dotenv()
 
-if __name__ == "__main__":
-    main()
+# llm = create_llama(model_path=os.getenv("LLAMA_CPP_MODEL_PATH"))
+
+llm = create_chatgpt()
+
+# llm = create_gemini()
+
+# Initialize the career recommendation system
+recommender = CareerRecommendationSystem(llm)
+
+# Start the interactive process
+fallback_input = """
+Counselor:
+Hi Alex, I’m glad you could make it today. How are you feeling about your career choices so far?
+
+Student:
+Um, to be honest, I’m not really sure. I feel like everyone around me knows what they want to do, and I’m just… lost.
+"""
+
+conversation_file = "conversation.txt"
+
+if os.path.exists(conversation_file):
+    with open(conversation_file, "r", encoding="utf-8") as file:
+        file_content = file.read().strip()
+        initial_input = file_content if file_content else fallback_input
+else:
+    initial_input = fallback_input
+
+result = recommender.interactive_recommendation_pipeline(initial_input)
+
+if result["status"] == "conversation_started":
+    print("Bot:", result["response"])
+    session_id = result["session_id"]
+    
+    while True:
+        user_input = input("You: ")
+        
+        conversation_result = recommender.continue_conversation(user_input, session_id)
+        print("Bot:", conversation_result["response"])
+        
+        if conversation_result["status"] == "ready_for_recommendation":
+            final_recommendation = recommender.finalize_recommendation(session_id)
+            print("\nFinal Career Recommendations:")
+            for explanation in final_recommendation["explanations"]:
+                print(f"\n- {explanation['career_path']}")
+                print(f"  Explanation: {explanation['explanation']}")
+                print(f"  Match Reason: {explanation['match_reason']}")
+            break
+elif result["status"] == "complete":
+    print("Direct recommendations generated!")
+    for explanation in result["explanations"]:
+        print(f"\n- {explanation['career_path']}")
+        print(f"  Explanation: {explanation['explanation']}")
